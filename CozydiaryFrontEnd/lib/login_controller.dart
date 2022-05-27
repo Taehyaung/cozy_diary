@@ -20,6 +20,7 @@ class LoginController extends GetxController {
   late List<String> responseBody;
 
   loginWithGoogle() async {
+    googleSignIn.signOut();
     googleAccount.value = await googleSignIn.signIn();
     final googleAuth = await googleAccount.value!.authentication;
     final credential = GoogleAuthProvider.credential(
@@ -30,7 +31,9 @@ class LoginController extends GetxController {
     final User? user = authResult.user;
     id = googleSignIn.currentUser!.id;
     userId = user!.uid;
-    await tohomepage();
+    print("this is id:" + id);
+    get(id, user.photoURL.toString());
+    // await tohomepage();
   }
 
   logout() async {
@@ -40,15 +43,18 @@ class LoginController extends GetxController {
     ));
   }
 
-  get() async {
+  get(String userid, String picUrl) async {
     var response =
-        await http.get(Uri.parse('http://172.20.10.3:8080/getUser?gid=' + id));
+        await http.get(Uri.parse('http://172.20.10.10:8080/getUser?gid=' + id));
     var responseBody = jsonDecode(response.body);
     print(responseBody);
     if (responseBody['data'] != null && responseBody['data']['googleId'] == id)
-      Get.to(HomePageTabbar());
+      tohomepage();
     else
-      Get.to(RegisterPage());
+      Get.to(RegisterPage(
+        uid: userid,
+        pic: picUrl,
+      ));
   }
 
   post() async {
@@ -74,9 +80,9 @@ class LoginController extends GetxController {
     Get.to(const HomePageTabbar());
   }
 
-  toregisterpage() async {
-    Get.to(RegisterPage());
-  }
+  // toregisterpage() async {
+  //   Get.to(RegisterPage());
+  // }
 
   testpost() async {
     var response = await http.post(
